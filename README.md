@@ -1,37 +1,41 @@
 rfc-822
 ===========
 
-FIXME (describe your package)
+Implementation of RFC-822
 
 Features
 --------
 
-* FIXME (list of features and unsolved problems)
+Validates RFC-822 Addresses
+
+More usefully, it validates the addr_spec portion of the addresses
 
 Examples
 --------
 
-    FIXME (code sample of usage)
+# Validate an address as per the RFC
+    RFC822.validate('example@example.net')
 
-Requirements
-------------
+# Validate an address per the addr_spec portion of the RFC
+# This is what most people actually expect in an address
+    RFC822.validate_addr('example@example.net')
 
-* FIXME (list of requirements)
+A note on the RFC
+-----------------
+RFC 822 has some oddities, it does things most people don't expect, such as
 
-Install
--------
+* It does not validate domains
+* It supports groups, multiple labeled lists of addresses. ex: MyGroup: "John Higgins" <john@example.net>, mark mark@example.net;
+* It supports routes, a sequence of mailservers the message is supposed to travel. ex: test@mymailserver@othermailserver.com
+* It support sdouble quoted strings as the local part of an address, with crazy chars in them. ex: "my@funkyaddress"@example.net
+* It supports phrases before angle bracketed addresses. ex: "Test" <test@example.net>.
 
-* FIXME (sudo gem install, anything else)
 
-Author
+Authors
 ------
 
-Original author: FIXME (author's name)
-
-Contributors:
-
-* FIXME (contributor 1?)
-* FIXME (contributor 2?)
+Evan Phoenix (evanphx)
+Andrew Cholakian (andrewvc)
 
 License
 -------
