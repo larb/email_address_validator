@@ -1,5 +1,7 @@
 %% name = RFC822::Parser
 
+%% { attr_accessor :validate_domain }
+
 HTAB = /\x09/
 LF   = /\x0A/
 CR   = /\x0D/
@@ -61,7 +63,9 @@ addr_spec = local_part ocms "@" ocms domain
 
 local_part = word ocms ("." ocms word)*
 
-domain = sub_domain ocms ("." ocms sub_domain)*
+domain = domain_literal
+       | < sub_domain ocms ("." ocms sub_domain)* >
+           &{ @validate_domain ? RFC822::DomainParser.new(text).parse : true }
 
 sub_domain = domain_ref | domain_literal
 

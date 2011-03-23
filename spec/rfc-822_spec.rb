@@ -27,6 +27,14 @@ describe RFC822 do
              "missingDot@com"
   ]
 
+  VALID_DOMAIN_COMMON = %w!evan@foo.com evan@com evan@blah.foo.com
+                           evan@foo-bar.com evan@foo3bar.com evan@foo-3bar.com
+                           evan@3foo-4bar.com!
+
+  INVALID_DOMAIN_COMMON = %w!evan@-foo.com evan@foo-.com evan@foo.c$m evan@-
+                             evan@thisismorethan63octetssoitwillfailbecauserfc1123sayssoandwedowhatitsays-bar.com
+                             evan@thisismorethan255octetssoitwillfailbecauserfc1123sayssoandwedowhatitsays.thisismorethan255octetssoitwillfailbecauserfc1123sayssoandwedowhatitsays.thisismorethan255octetssoitwillfailbecauserfc1123sayssoandwedowhatitsays.thisismorethan255octetssoitwillfailbecauserfc1123sayssoandwedowhatitsays!
+
   INVALID_COMMON =
             ["NotAnEmail", "@NotAnEmail", "nodomain@", "missingDomain@.com",
              "@missingLocal.org", "missingatSign.net",
@@ -63,6 +71,18 @@ describe RFC822 do
     end
   end
 
+  VALID_DOMAIN_COMMON.each do |addr|
+    it "should validate the domain of <#{addr}> as valid" do
+      RFC822.validate(addr, true).should be_true
+    end
+  end
+
+  INVALID_DOMAIN_COMMON.each do |addr|
+    it "should validate the domain of <#{addr}> as invalid" do
+      RFC822.validate(addr, true).should be_false
+    end
+  end
+
   VALID_MODERN = VALID_COMMON
 
   INVALID_MODERN = INVALID_COMMON
@@ -84,4 +104,17 @@ describe RFC822 do
       RFC822.validate_modern_addr(addr).should be_true
     end
   end
+
+  VALID_DOMAIN_COMMON.each do |addr|
+    it "should validate the domain of <#{addr}> as valid" do
+      RFC822.validate_modern(addr, true).should be_true
+    end
+  end
+
+  INVALID_DOMAIN_COMMON.each do |addr|
+    it "should validate the domain of <#{addr}> as invalid" do
+      RFC822.validate(addr, true).should be_false
+    end
+  end
+
 end

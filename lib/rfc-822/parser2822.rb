@@ -11,9 +11,6 @@ class RFC822::Parser2822
       setup_foreign_grammar
     end
 
-    def setup_foreign_grammar
-    end
-
     # This is distinct from setup_parser so that a standalone parser
     # can redefine #initialize and still have access to the proper
     # parser setup code.
@@ -315,6 +312,9 @@ class RFC822::Parser2822
     end
 
     #
+
+ attr_accessor :validate_domain 
+
   def setup_foreign_grammar; end
 
   # d = < . > &{ text[0] == num }
@@ -1550,18 +1550,58 @@ class RFC822::Parser2822
     return _tmp
   end
 
-  # domain = (dot-atom | domain-literal | obs-domain)
+  # domain = (< dot-atom > &{ @validate_domain ? RFC822::DomainParser.new(text).parse : true } | domain-literal | < obs-domain > &{ @validate_domain ? RFC822::DomainParser.new(text).parse : true })
   def _domain
 
     _save = self.pos
     while true # choice
+
+    _save1 = self.pos
+    while true # sequence
+    _text_start = self.pos
     _tmp = apply(:_dot_hyphen_atom)
+    if _tmp
+      text = get_text(_text_start)
+    end
+    unless _tmp
+      self.pos = _save1
+      break
+    end
+    _save2 = self.pos
+    _tmp = begin;  @validate_domain ? RFC822::DomainParser.new(text).parse : true ; end
+    self.pos = _save2
+    unless _tmp
+      self.pos = _save1
+    end
+    break
+    end # end sequence
+
     break if _tmp
     self.pos = _save
     _tmp = apply(:_domain_hyphen_literal)
     break if _tmp
     self.pos = _save
+
+    _save3 = self.pos
+    while true # sequence
+    _text_start = self.pos
     _tmp = apply(:_obs_hyphen_domain)
+    if _tmp
+      text = get_text(_text_start)
+    end
+    unless _tmp
+      self.pos = _save3
+      break
+    end
+    _save4 = self.pos
+    _tmp = begin;  @validate_domain ? RFC822::DomainParser.new(text).parse : true ; end
+    self.pos = _save4
+    unless _tmp
+      self.pos = _save3
+    end
+    break
+    end # end sequence
+
     break if _tmp
     self.pos = _save
     break
@@ -2478,7 +2518,7 @@ class RFC822::Parser2822
   Rules[:_address_hyphen_list] = rule_info("address-list", "(address (\",\" address)* | obs-addr-list)")
   Rules[:_addr_hyphen_spec] = rule_info("addr-spec", "local-part \"@\" domain")
   Rules[:_local_hyphen_part] = rule_info("local-part", "(dot-atom | quoted-string | obs-local-part)")
-  Rules[:_domain] = rule_info("domain", "(dot-atom | domain-literal | obs-domain)")
+  Rules[:_domain] = rule_info("domain", "(< dot-atom > &{ @validate_domain ? RFC822::DomainParser.new(text).parse : true } | domain-literal | < obs-domain > &{ @validate_domain ? RFC822::DomainParser.new(text).parse : true })")
   Rules[:_domain_hyphen_literal] = rule_info("domain-literal", "CFWS? \"[\" (FWS? dcontent)* FWS? \"]\" CFWS?")
   Rules[:_dcontent] = rule_info("dcontent", "(dtext | quoted-pair)")
   Rules[:_dtext] = rule_info("dtext", "(NO-WS-CTL | d_btw(33,90) | d_btw(94,126))")

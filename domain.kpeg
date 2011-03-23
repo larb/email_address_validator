@@ -1,0 +1,28 @@
+%% name = RFC822::DomainParser
+
+domain = < subdomain > &{ text.size < 255 }
+
+subdomain = subdomain "." label
+          | label
+
+# See http://tools.ietf.org/html/rfc1123#section-2.1.
+# It allows for a digit to start a label.
+
+label = let-dig < let-dig-hyp* >
+          &{ text.size < 63 && (text.size == 0 || text[-1] != ?-) }
+
+let-dig-hyp = let-dig | "-"
+
+let-dig = letter | digit
+
+# <letter> ::= any one of the 52 alphabetic characters A through Z in
+#              upper case and a through z in lower case
+
+letter = /[A-Za-z]/
+
+# <digit> ::= any one of the ten digits 0 through 9
+
+digit = /[0-9]/
+
+root = domain !.
+

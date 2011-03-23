@@ -1,5 +1,7 @@
 %% name = RFC822::Parser2822
 
+%% { attr_accessor :validate_domain }
+
 d(num) = <.> &{ text[0] == num }
 d_btw(start,fin) = <.> &{ t = text[0]; t >= start && t <= fin }
 
@@ -103,7 +105,11 @@ addr-spec = local-part "@" domain
 
 local-part = dot-atom | quoted-string | obs-local-part
 
-domain = dot-atom | domain-literal | obs-domain
+domain = < dot-atom >
+            &{ @validate_domain ? RFC822::DomainParser.new(text).parse : true }
+       | domain-literal
+       | < obs-domain >
+            &{ @validate_domain ? RFC822::DomainParser.new(text).parse : true }
 
 domain-literal = CFWS? "[" (FWS? dcontent)* FWS? "]" CFWS?
 

@@ -11,9 +11,6 @@ class RFC822::Parser
       setup_foreign_grammar
     end
 
-    def setup_foreign_grammar
-    end
-
     # This is distinct from setup_parser so that a standalone parser
     # can redefine #initialize and still have access to the proper
     # parser setup code.
@@ -315,6 +312,9 @@ class RFC822::Parser
     end
 
     #
+
+ attr_accessor :validate_domain 
+
   def setup_foreign_grammar; end
 
   # HTAB = /\x09/
@@ -1130,38 +1130,48 @@ class RFC822::Parser
     return _tmp
   end
 
-  # domain = sub_domain ocms ("." ocms sub_domain)*
+  # domain = (domain_literal | < sub_domain ocms ("." ocms sub_domain)* > &{ @validate_domain ? RFC822::DomainParser.new(text).parse : true })
   def _domain
 
     _save = self.pos
+    while true # choice
+    _tmp = apply(:_domain_literal)
+    break if _tmp
+    self.pos = _save
+
+    _save1 = self.pos
+    while true # sequence
+    _text_start = self.pos
+
+    _save2 = self.pos
     while true # sequence
     _tmp = apply(:_sub_domain)
     unless _tmp
-      self.pos = _save
+      self.pos = _save2
       break
     end
     _tmp = apply(:_ocms)
     unless _tmp
-      self.pos = _save
+      self.pos = _save2
       break
     end
     while true
 
-    _save2 = self.pos
+    _save4 = self.pos
     while true # sequence
     _tmp = match_string(".")
     unless _tmp
-      self.pos = _save2
+      self.pos = _save4
       break
     end
     _tmp = apply(:_ocms)
     unless _tmp
-      self.pos = _save2
+      self.pos = _save4
       break
     end
     _tmp = apply(:_sub_domain)
     unless _tmp
-      self.pos = _save2
+      self.pos = _save4
     end
     break
     end # end sequence
@@ -1170,10 +1180,31 @@ class RFC822::Parser
     end
     _tmp = true
     unless _tmp
-      self.pos = _save
+      self.pos = _save2
     end
     break
     end # end sequence
+
+    if _tmp
+      text = get_text(_text_start)
+    end
+    unless _tmp
+      self.pos = _save1
+      break
+    end
+    _save5 = self.pos
+    _tmp = begin;  @validate_domain ? RFC822::DomainParser.new(text).parse : true ; end
+    self.pos = _save5
+    unless _tmp
+      self.pos = _save1
+    end
+    break
+    end # end sequence
+
+    break if _tmp
+    self.pos = _save
+    break
+    end # end choice
 
     set_failed_rule :_domain unless _tmp
     return _tmp
@@ -1284,7 +1315,7 @@ class RFC822::Parser
   Rules[:_route] = rule_info("route", "(AT ocms domain)+ \":\"")
   Rules[:_addr_spec] = rule_info("addr_spec", "local_part ocms \"@\" ocms domain")
   Rules[:_local_part] = rule_info("local_part", "word ocms (\".\" ocms word)*")
-  Rules[:_domain] = rule_info("domain", "sub_domain ocms (\".\" ocms sub_domain)*")
+  Rules[:_domain] = rule_info("domain", "(domain_literal | < sub_domain ocms (\".\" ocms sub_domain)* > &{ @validate_domain ? RFC822::DomainParser.new(text).parse : true })")
   Rules[:_sub_domain] = rule_info("sub_domain", "(domain_ref | domain_literal)")
   Rules[:_domain_ref] = rule_info("domain_ref", "atom")
   Rules[:_root] = rule_info("root", "valid !.")

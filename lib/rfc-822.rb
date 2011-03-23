@@ -55,23 +55,32 @@ module RFC822
   end
 
 
-  def self.validate(addr)
+  def self.validate(addr, validate_domain=false)
     parser = Parser.new(addr)
+    parser.validate_domain = validate_domain
     parser.parse
   end
 
-  def self.validate_addr(addr)
+  def self.validate_addr(addr, validate_domain=false)
     parser = Parser.new(addr, "only_addr_spec")
+    parser.validate_domain = validate_domain
     parser.parse
   end
 
-  def self.validate_modern(addr)
+  def self.validate_modern(addr, validate_domain=false)
     parser = Parser2822.new(addr)
+    parser.validate_domain = validate_domain
     parser.parse
   end
 
-  def self.validate_modern_addr(addr)
+  def self.validate_modern_addr(addr, validate_domain=false)
     parser = Parser2822.new(addr, "only_addr_spec")
+    parser.validate_domain = validate_domain
+    parser.parse
+  end
+
+  def self.validate_domain(domain)
+    parser = DomainParser.new(addr)
     parser.parse
   end
 
