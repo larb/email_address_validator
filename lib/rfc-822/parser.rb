@@ -1130,7 +1130,7 @@ class RFC822::Parser
     return _tmp
   end
 
-  # domain = sub_domain ocms ("." ocms sub_domain)+
+  # domain = sub_domain ocms ("." ocms sub_domain)*
   def _domain
 
     _save = self.pos
@@ -1145,7 +1145,7 @@ class RFC822::Parser
       self.pos = _save
       break
     end
-    _save1 = self.pos
+    while true
 
     _save2 = self.pos
     while true # sequence
@@ -1166,34 +1166,9 @@ class RFC822::Parser
     break
     end # end sequence
 
-    if _tmp
-      while true
-    
-    _save3 = self.pos
-    while true # sequence
-    _tmp = match_string(".")
-    unless _tmp
-      self.pos = _save3
-      break
+    break unless _tmp
     end
-    _tmp = apply(:_ocms)
-    unless _tmp
-      self.pos = _save3
-      break
-    end
-    _tmp = apply(:_sub_domain)
-    unless _tmp
-      self.pos = _save3
-    end
-    break
-    end # end sequence
-
-        break unless _tmp
-      end
-      _tmp = true
-    else
-      self.pos = _save1
-    end
+    _tmp = true
     unless _tmp
       self.pos = _save
     end
@@ -1253,6 +1228,30 @@ class RFC822::Parser
     return _tmp
   end
 
+  # only_addr_spec = addr_spec !.
+  def _only_addr_spec
+
+    _save = self.pos
+    while true # sequence
+    _tmp = apply(:_addr_spec)
+    unless _tmp
+      self.pos = _save
+      break
+    end
+    _save1 = self.pos
+    _tmp = get_byte
+    _tmp = _tmp ? nil : true
+    self.pos = _save1
+    unless _tmp
+      self.pos = _save
+    end
+    break
+    end # end sequence
+
+    set_failed_rule :_only_addr_spec unless _tmp
+    return _tmp
+  end
+
   Rules = {}
   Rules[:_HTAB] = rule_info("HTAB", "/\\x09/")
   Rules[:_LF] = rule_info("LF", "/\\x0A/")
@@ -1285,8 +1284,9 @@ class RFC822::Parser
   Rules[:_route] = rule_info("route", "(AT ocms domain)+ \":\"")
   Rules[:_addr_spec] = rule_info("addr_spec", "local_part ocms \"@\" ocms domain")
   Rules[:_local_part] = rule_info("local_part", "word ocms (\".\" ocms word)*")
-  Rules[:_domain] = rule_info("domain", "sub_domain ocms (\".\" ocms sub_domain)+")
+  Rules[:_domain] = rule_info("domain", "sub_domain ocms (\".\" ocms sub_domain)*")
   Rules[:_sub_domain] = rule_info("sub_domain", "(domain_ref | domain_literal)")
   Rules[:_domain_ref] = rule_info("domain_ref", "atom")
   Rules[:_root] = rule_info("root", "valid !.")
+  Rules[:_only_addr_spec] = rule_info("only_addr_spec", "addr_spec !.")
 end
