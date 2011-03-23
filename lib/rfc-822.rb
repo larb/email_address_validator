@@ -65,6 +65,15 @@ module RFC822
     parser.parse
   end
 
+  def self.validate_modern(addr)
+    parser = Parser2822.new(addr)
+    parser.parse
+  end
+
+  def self.validate_modern_addr(addr)
+    parser = Parser2822.new(addr, "only_addr_spec")
+    parser.parse
+  end
 
 end  # module RFC822
 
