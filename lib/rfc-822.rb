@@ -54,6 +54,18 @@ module RFC822
     Dir.glob(search_me).sort.each {|rb| require rb}
   end
 
+
+  def self.validate(addr)
+    parser = Parser.new(addr)
+    parser.parse
+  end
+
+  def self.validate_addr(addr)
+    parser = Parser.new(addr, "only_addr_spec")
+    parser.parse
+  end
+
+
 end  # module RFC822
 
 RFC822.require_all_libs_relative_to(__FILE__)

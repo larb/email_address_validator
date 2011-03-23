@@ -1,0 +1,72 @@
+%% name = RFC822::Parser
+
+HTAB = /\x09/
+LF   = /\x0A/
+CR   = /\x0D/
+SPACE = " "
+- = SPACE*
+AT    = "@"
+
+LWSP_char = SPACE | HTAB
+CHAR = /[\x00-\x7f]/
+CTL  = /[\x00-\x1f\x7f]/
+
+special = /[\]()<>@,;:\\".\[]/
+
+CRLF = CR LF
+
+linear_white_space = (CRLF? LWSP_char)+
+
+atom = /[^\]\x00-\x20 \x7F\x80-\xFF()<>@,;:\\".\[]+/
+
+ctext = /[^)\\\x0D\x80-\xFF(]+/
+      | linear_white_space
+
+
+dtext = /[^\]\\\x0D\x80-\xFF\[]+/
+      | linear_white_space
+
+qtext = /[^"\\\x0D\x80-\xFF]+/
+      | linear_white_space
+
+
+quoted_pair = "\\" CHAR
+
+quoted_string = "\"" (qtext | quoted_pair)* "\""
+
+domain_literal = "[" (dtext | quoted_pair)* "]"
+
+comment = "(" (ctext | quoted_pair | comment)* ")"
+
+ocms = comment*
+
+word = atom | quoted_string
+
+phrase = (word -)+
+
+valid = ocms address ocms
+
+address = mailbox | group
+
+group = phrase ocms ":" ocms mailbox (ocms "," ocms mailbox)* ocms ";"
+
+mailbox = addr_spec
+        | phrase - ocms - angle_addr
+
+angle_addr = "<" ocms route? ocms addr_spec ">"
+
+route = (AT ocms domain)+ ":"
+
+addr_spec = local_part ocms "@" ocms domain
+
+local_part = word ocms ("." ocms word)*
+
+domain = sub_domain ocms ("." ocms sub_domain)*
+
+sub_domain = domain_ref | domain_literal
+
+domain_ref = atom
+
+root = valid !.
+
+only_addr_spec = addr_spec !.

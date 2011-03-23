@@ -8,6 +8,10 @@ end
 task :default => 'test:run'
 task 'gem:release' => 'test:run'
 
+task "parser" do
+  sh "kpeg -s -o lib/rfc-822/parser.rb -f email.kpeg"
+end
+
 Bones {
   name     'rfc-822'
   authors  'FIXME (who is writing this software)'
