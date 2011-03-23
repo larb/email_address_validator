@@ -13,9 +13,9 @@ task "parser" do
 end
 
 Bones {
-  name     'rfc-822'
-  authors  'FIXME (who is writing this software)'
-  email    'FIXME (your e-mail)'
-  url      'FIXME (project homepage)'
+  name     'rfc-822-validator'
+  authors  'Evan Phoenix, Andrew Cholakian'
+  email    'andrew@andrewvc.com'
+  url      'https://github.com/andrewvc/rfc-822'
 }
 

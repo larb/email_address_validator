@@ -1,12 +1,12 @@
-rfc-822
+rfc-2822
 ===========
 
-Implementation of RFC-822
+Implementation of RFC-2822
 
 Features
 --------
 
-Validates RFC-822 Addresses
+Validates RFC-2822 Addresses
 
 More usefully, it validates the addr_spec portion of the addresses
 
