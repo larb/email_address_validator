@@ -1,0 +1,146 @@
+%% name = RFC822::Parser2822
+
+d(num) = <.> &{ text[0] == num }
+d_btw(start,fin) = <.> &{ t = text[0]; t >= start && t <= fin }
+
+WSP = " " | d(9)
+
+LF   = /\x0A/
+CR   = /\x0D/
+
+CRLF = CR LF
+
+ALPHA = /[A-Za-z]/
+
+DIGIT = /[0-9]/
+
+NO-WS-CTL = d_btw(1,8)
+          | d(11)
+          | d(12)
+          | d_btw(14,31)
+          | d(127)
+
+text = d_btw(1,9)
+     | d(11)
+     | d(12)
+     | d_btw(14,127)
+     | obs-text
+
+quoted-pair = "\\" text
+            | obs-qp
+
+FWS = (WSP* CRLF)? WSP+
+    | obs-FWS
+
+ctext = NO-WS-CTL
+      | d_btw(33,39)
+      | d_btw(42,91)
+      | d_btw(93,126)
+
+ccontent = ctext | quoted-pair | comment
+
+comment = "(" (FWS? ccontent)* FWS? ")"
+
+CFWS = (FWS? comment)* ((FWS? comment) | FWS)
+
+atext = ALPHA | DIGIT
+      | "!" | "#"
+      | "$" | "%"
+      | "&" | "'"
+      | "*" | "+"
+      | "-" | "/"
+      | "=" | "?"
+      | "^" | "_"
+      | "`" | "{"
+      | "|" | "}"
+      | "~"
+
+atom = CFWS? atext+ CFWS?
+
+dot-atom = CFWS? dot-atom-text CFWS?
+
+dot-atom-text = atext+ ("." atext+)*
+
+qtext = NO-WS-CTL
+      | d(33)
+      | d_btw(35,91)
+      | d_btw(93,126)
+
+qcontent = qtext | quoted-pair
+
+quoted-string = CFWS? "\"" (FWS? qcontent)* FWS? "\"" CFWS?
+
+word = atom | quoted-string
+
+phrase = word+ | obs-phrase
+
+utext = NO-WS-CTL
+      | d_btw(33,126)
+      | obs-utext
+
+unstructured = (FWS? utext)* FWS?
+
+address = mailbox | group
+
+mailbox = name-addr | addr-spec
+
+name-addr = display-name? angle-addr
+
+angle-addr = CFWS? "<" addr-spec ">" CFWS?
+           | obs-angle-addr
+
+group = display-name ":" (mailbox-list | CFWS)? ";" CFWS?
+
+display-name = phrase
+
+mailbox-list = mailbox ("," mailbox)*
+             | obs-mbox-list
+
+address-list = address ("," address)*
+             | obs-addr-list
+
+addr-spec = local-part "@" domain
+
+local-part = dot-atom | quoted-string | obs-local-part
+
+domain = dot-atom | domain-literal | obs-domain
+
+domain-literal = CFWS? "[" (FWS? dcontent)* FWS? "]" CFWS?
+
+dcontent = dtext | quoted-pair
+
+dtext = NO-WS-CTL
+      | d_btw(33,90)
+      | d_btw(94,126)
+
+obs-qp = "\\" d_btw(0,127)
+
+obs-text = LF* CR* (obs-char LF* CR*)*
+
+obs-char = d_btw(0,9) | d(11)
+         | d(12) | d_btw(14,127)
+
+obs-utext = obs-text
+
+obs-phrase = word (word | "." | CFWS)*
+
+obs-phrase-list = phrase
+                | (phrase? CFWS? "," CFWS?)+ phrase?
+
+obs-FWS = WSP+ (CRLF WSP+)*
+
+obs-angle-addr = CFWS? "<" obs-route? addr-spec ">" CFWS?
+
+obs-route = CFWS? obs-domain-list ":" CFWS?
+
+obs-domain-list = "@" domain ((CFWS | ",")* CFWS? "@" domain)*
+
+obs-local-part = word ("." word)*
+
+obs-domain = atom ("." atom)*
+
+obs-mbox-list = (address? CFWS? "," CFWS?)+ address?
+
+root = address !.
+
+only_addr_spec = addr-spec !.
