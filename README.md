@@ -1,45 +1,65 @@
-rfc-2822
-===========
+# EmailAddressValidator #
 
-Implementation of RFC-2822
+Implementation of RFCs 2822 and 822 For email address parsing, and 1123 for Domain Parsing
 
-Features
---------
+## Description ##
 
-Validates RFC-2822 Addresses
+Parsing email addresses is not easy, and most regex based approaches deviate from the RFCs. This library is based off the actual grammars in the RFCs, allowing it to achieve greater accuracy.
 
-More usefully, it validates the addr_spec portion of the addresses
+This may mean that this library is more permissive than you desire, as the RFCs support syntax that many will find undesirable. To accomodate this, there are a few options users can set to achieve more practical results.
 
-Examples
---------
+The two man things to know are that:
 
-# Validate an address as per the RFC
-    RFC822.validate('example@example.net')
+1. What most people desire from a validator is to match only the addr_spec portion of the grammars, as this keeps certain weird addresses, such as RFC groups excluded.
+2. RFCs 822/2822 do not require valid domains, essentially requiring little more than dotted strings. This library provides additional RFC-1123 Parsing to ensure that a valid domain has been passed in.
 
-# Validate an address per the addr_spec portion of the RFC
-# This is what most people actually expect in an address
-    RFC822.validate_addr('example@example.net')
+## Examples ##
 
-A note on the RFC
------------------
-RFC 822 has some oddities, it does things most people don't expect, such as
+Validate only the addr_spec portion of an address as per RFC-2822. Additionally, validate the domain of the address as per RFC-1123. This is what most people probably want:
 
-* It does not validate domains
-* It supports groups, multiple labeled lists of addresses. ex: MyGroup: "John Higgins" <john@example.net>, mark mark@example.net;
-* It supports routes, a sequence of mailservers the message is supposed to travel. ex: test@mymailserver@othermailserver.com
-* It support sdouble quoted strings as the local part of an address, with crazy chars in them. ex: "my@funkyaddress"@example.net
-* It supports phrases before angle bracketed addresses. ex: "Test" <test@example.net>.
+    EmailAddressValidator.validate_addr('example@example.net',true)
 
+Validate against the full grammar for RFC-2822, without checking the domain.
 
-Authors
-------
+    EmailAddressValidator.validate('example@example.net', false)
 
-Evan Phoenix (evanphx)
-Andrew Cholakian (andrewvc)
+Validate against the addr_spec portion of RFC-822
 
-License
--------
+    EmailAddressValidator.validate_822_addr('example@example.net')
 
+Validate against the full grammar for RFC-822
+
+    EmailAddressValidator.validate_822('example@example.net')
+
+Validate a domain per RFC-1123
+    
+    EmailAddressValidator.validate_domain('example.net')
+
+## Additional notes on the RFCs ##
+
+RFC 2822 removes a lot of the cruft that 822 carries with it, unless you have a good reason, you likely want to stay away from RFC 822.
+
+A few fun things came up researching this library: 
+
+* RFCs 2822/822 do not validate domains properly.
+* RFCs 2822/822 support groups, multiple labeled lists of addresses such as `MyGroup: "John Higgins" <john@example.net>, mark mark@example.net;`
+* RFC 822 supports routes, a sequence of mailservers the message is supposed to travel, such as `test@mymailserver@othermailserver.com`
+* RFCs 2822/822 support double quoted strings as the local part of an address, with crazy chars in them, such as `"my@funky$address"@example.net`
+* RFCs 2822/822 support phrases before angle bracketed addresses so the entirety of the string `"Test" <test@example.net>` is valid. This is why you probably only want to validate the addr_spec portion.
+
+## Further Reading ##
+
+[RFC-2822](http://www.ietf.org/rfc/rfc2822.txt)
+[RFC-822](http://www.ietf.org/rfc/rfc0822.txt)
+[RFC-1123](http://www.ietf.org/rfc/rfc1123.txt)
+
+## Authors ##
+
+Evan Phoenix [evanphx](http://github.com/evanphx)
+Andrew Cholakian [andrewvc](http://github.com/andrewvc)
+
+## License ##
+ 
 (The MIT License) FIXME (different license?)
 
 Copyright (c) 2011 FIXME (author's name)
