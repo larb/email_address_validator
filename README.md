@@ -50,13 +50,16 @@ A few fun things came up researching this library:
 ## Further Reading ##
 
 [RFC-2822](http://www.ietf.org/rfc/rfc2822.txt)
+ 
 [RFC-822](http://www.ietf.org/rfc/rfc0822.txt)
+ 
 [RFC-1123](http://www.ietf.org/rfc/rfc1123.txt)
 
 ## Authors ##
 
-Evan Phoenix [evanphx](http://github.com/evanphx)
-Andrew Cholakian [andrewvc](http://github.com/andrewvc)
+Evan Phoenix / [evanphx](http://github.com/evanphx)
+
+Andrew Cholakian / [andrewvc](http://github.com/andrewvc)
 
 ## License ##
  
