@@ -1,6 +1,6 @@
 # EmailAddressValidator #
 
-Implementation of RFCs 2822 and 822 For email address parsing, and 1123 for Domain Parsing
+Implementation of RFCs 2822 and 822 for email address validation, and 1123 for domain validation.
 
 ## Description ##
 
