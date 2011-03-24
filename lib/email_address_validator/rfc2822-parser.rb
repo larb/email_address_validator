@@ -1553,7 +1553,7 @@ class EmailAddressValidator::RFC2822Parser
     return _tmp
   end
 
-  # domain = (< dot-atom > &{ @validate_domain ? RFC822::DomainParser.new(text).parse : true } | domain-literal | < obs-domain > &{ @validate_domain ? RFC822::DomainParser.new(text).parse : true })
+  # domain = (< dot-atom > &{ @validate_domain ? EmailAddressValidator::DomainParser.new(text).parse : true } | domain-literal | < obs-domain > &{ @validate_domain ? EmailAddressValidator::DomainParser.new(text).parse : true })
   def _domain
 
     _save = self.pos
@@ -1571,7 +1571,7 @@ class EmailAddressValidator::RFC2822Parser
       break
     end
     _save2 = self.pos
-    _tmp = begin;  @validate_domain ? RFC822::DomainParser.new(text).parse : true ; end
+    _tmp = begin;  @validate_domain ? EmailAddressValidator::DomainParser.new(text).parse : true ; end
     self.pos = _save2
     unless _tmp
       self.pos = _save1
@@ -1597,7 +1597,7 @@ class EmailAddressValidator::RFC2822Parser
       break
     end
     _save4 = self.pos
-    _tmp = begin;  @validate_domain ? RFC822::DomainParser.new(text).parse : true ; end
+    _tmp = begin;  @validate_domain ? EmailAddressValidator::DomainParser.new(text).parse : true ; end
     self.pos = _save4
     unless _tmp
       self.pos = _save3
@@ -2521,7 +2521,7 @@ class EmailAddressValidator::RFC2822Parser
   Rules[:_address_hyphen_list] = rule_info("address-list", "(address (\",\" address)* | obs-addr-list)")
   Rules[:_addr_hyphen_spec] = rule_info("addr-spec", "local-part \"@\" domain")
   Rules[:_local_hyphen_part] = rule_info("local-part", "(dot-atom | quoted-string | obs-local-part)")
-  Rules[:_domain] = rule_info("domain", "(< dot-atom > &{ @validate_domain ? RFC822::DomainParser.new(text).parse : true } | domain-literal | < obs-domain > &{ @validate_domain ? RFC822::DomainParser.new(text).parse : true })")
+  Rules[:_domain] = rule_info("domain", "(< dot-atom > &{ @validate_domain ? EmailAddressValidator::DomainParser.new(text).parse : true } | domain-literal | < obs-domain > &{ @validate_domain ? EmailAddressValidator::DomainParser.new(text).parse : true })")
   Rules[:_domain_hyphen_literal] = rule_info("domain-literal", "CFWS? \"[\" (FWS? dcontent)* FWS? \"]\" CFWS?")
   Rules[:_dcontent] = rule_info("dcontent", "(dtext | quoted-pair)")
   Rules[:_dtext] = rule_info("dtext", "(NO-WS-CTL | d_btw(33,90) | d_btw(94,126))")

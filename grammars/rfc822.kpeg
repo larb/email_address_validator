@@ -65,7 +65,7 @@ local_part = word ocms ("." ocms word)*
 
 domain = domain_literal
        | < sub_domain ocms ("." ocms sub_domain)* >
-           &{ @validate_domain ? RFC822::DomainParser.new(text).parse : true }
+           &{ @validate_domain ? EmailAddressValidator::DomainParser.new(text).parse : true }
 
 sub_domain = domain_ref | domain_literal
 

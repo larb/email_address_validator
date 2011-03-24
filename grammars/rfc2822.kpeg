@@ -106,10 +106,10 @@ addr-spec = local-part "@" domain
 local-part = dot-atom | quoted-string | obs-local-part
 
 domain = < dot-atom >
-            &{ @validate_domain ? RFC822::DomainParser.new(text).parse : true }
+            &{ @validate_domain ? EmailAddressValidator::DomainParser.new(text).parse : true }
        | domain-literal
        | < obs-domain >
-            &{ @validate_domain ? RFC822::DomainParser.new(text).parse : true }
+            &{ @validate_domain ? EmailAddressValidator::DomainParser.new(text).parse : true }
 
 domain-literal = CFWS? "[" (FWS? dcontent)* FWS? "]" CFWS?
 

@@ -1133,7 +1133,7 @@ class EmailAddressValidator::RFC822Parser
     return _tmp
   end
 
-  # domain = (domain_literal | < sub_domain ocms ("." ocms sub_domain)* > &{ @validate_domain ? RFC822::DomainParser.new(text).parse : true })
+  # domain = (domain_literal | < sub_domain ocms ("." ocms sub_domain)* > &{ @validate_domain ? EmailAddressValidator::DomainParser.new(text).parse : true })
   def _domain
 
     _save = self.pos
@@ -1196,7 +1196,7 @@ class EmailAddressValidator::RFC822Parser
       break
     end
     _save5 = self.pos
-    _tmp = begin;  @validate_domain ? RFC822::DomainParser.new(text).parse : true ; end
+    _tmp = begin;  @validate_domain ? EmailAddressValidator::DomainParser.new(text).parse : true ; end
     self.pos = _save5
     unless _tmp
       self.pos = _save1
@@ -1318,7 +1318,7 @@ class EmailAddressValidator::RFC822Parser
   Rules[:_route] = rule_info("route", "(AT ocms domain)+ \":\"")
   Rules[:_addr_spec] = rule_info("addr_spec", "local_part ocms \"@\" ocms domain")
   Rules[:_local_part] = rule_info("local_part", "word ocms (\".\" ocms word)*")
-  Rules[:_domain] = rule_info("domain", "(domain_literal | < sub_domain ocms (\".\" ocms sub_domain)* > &{ @validate_domain ? RFC822::DomainParser.new(text).parse : true })")
+  Rules[:_domain] = rule_info("domain", "(domain_literal | < sub_domain ocms (\".\" ocms sub_domain)* > &{ @validate_domain ? EmailAddressValidator::DomainParser.new(text).parse : true })")
   Rules[:_sub_domain] = rule_info("sub_domain", "(domain_ref | domain_literal)")
   Rules[:_domain_ref] = rule_info("domain_ref", "atom")
   Rules[:_root] = rule_info("root", "valid !.")

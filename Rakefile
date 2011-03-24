@@ -9,9 +9,9 @@ task :default => 'test:run'
 task 'gem:release' => 'test:run'
 
 task "parser" do
-  sh "kpeg -s -o lib/email-address-validator/rfc822-parser.rb  -f grammars/rfc822.kpeg"
-  sh "kpeg -s -o lib/email-address-validator/rfc2822-parser.rb -f grammars/rfc2822.kpeg"
-  sh "kpeg -s -o lib/email-address-validator/domain-parser.rb  -f grammars/domain.kpeg"
+  sh "kpeg -s -o lib/email_address_validator/rfc822-parser.rb  -f grammars/rfc822.kpeg"
+  sh "kpeg -s -o lib/email_address_validator/rfc2822-parser.rb -f grammars/rfc2822.kpeg"
+  sh "kpeg -s -o lib/email_address_validator/domain-parser.rb  -f grammars/domain.kpeg"
 end
 
 Bones {
