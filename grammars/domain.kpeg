@@ -1,4 +1,4 @@
-%% name = RFC822::DomainParser
+%% name = EmailAddressValidator::DomainParser
 
 domain = < subdomain > &{ text.size < 255 }
 

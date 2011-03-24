@@ -1,4 +1,4 @@
-%% name = RFC822::Parser
+%% name = EmailAddressValidator::RFC822Parser
 
 %% { attr_accessor :validate_domain }
 

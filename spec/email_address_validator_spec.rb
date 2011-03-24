@@ -1,7 +1,7 @@
 
 require File.join(File.dirname(__FILE__), %w[spec_helper])
 
-describe RFC822 do
+describe EmailAddressValidator do
   VALID_COMMON   =
             ["simple@example.com", "\"Abc\@def\"@example.com",
              "\"Fred Bloggs\"@example.com", "\"Joe\\Blow\"@example.com",
@@ -55,31 +55,31 @@ describe RFC822 do
 
   VALID.each do |addr|
     it "should recognize <#{addr}> as valid" do
-      RFC822.validate(addr).should be_true
+      EmailAddressValidator.validate_822(addr).should be_true
     end
   end
 
   INVALID.each do |addr|
     it "should recognize <#{addr}> as invalid" do
-      RFC822.validate(addr).should be_false
+      EmailAddressValidator.validate_822(addr).should be_false
     end
   end
 
   VALID_ADDRSPEC.each do |addr|
     it "should recognize <#{addr}> as valid" do
-      RFC822.validate_addr(addr).should be_true
+      EmailAddressValidator.validate_822_addr(addr).should be_true
     end
   end
 
   VALID_DOMAIN_COMMON.each do |addr|
     it "should validate the domain of <#{addr}> as valid" do
-      RFC822.validate(addr, true).should be_true
+      EmailAddressValidator.validate_822(addr, true).should be_true
     end
   end
 
   INVALID_DOMAIN_COMMON.each do |addr|
     it "should validate the domain of <#{addr}> as invalid" do
-      RFC822.validate(addr, true).should be_false
+      EmailAddressValidator.validate_822(addr, true).should be_false
     end
   end
 
@@ -89,31 +89,31 @@ describe RFC822 do
 
   VALID_MODERN.each do |addr|
     it "should recognize modern <#{addr}> as valid" do
-      RFC822.validate_modern(addr).should be_true
+      EmailAddressValidator.validate_2822_addr(addr).should be_true
     end
   end
 
   INVALID_MODERN.each do |addr|
     it "should recognize modern <#{addr}> as invalid" do
-      RFC822.validate_modern(addr).should be_false
+      EmailAddressValidator.validate_2822_addr(addr).should be_false
     end
   end
 
   VALID_ADDRSPEC.each do |addr|
     it "should recognize modern <#{addr}> as valid" do
-      RFC822.validate_modern_addr(addr).should be_true
+      EmailAddressValidator.validate_2822_addr(addr).should be_true
     end
   end
 
   VALID_DOMAIN_COMMON.each do |addr|
     it "should validate the domain of <#{addr}> as valid" do
-      RFC822.validate_modern(addr, true).should be_true
+      EmailAddressValidator.validate_2822(addr, true).should be_true
     end
   end
 
   INVALID_DOMAIN_COMMON.each do |addr|
     it "should validate the domain of <#{addr}> as invalid" do
-      RFC822.validate(addr, true).should be_false
+      EmailAddressValidator.validate_822(addr, true).should be_false
     end
   end
 

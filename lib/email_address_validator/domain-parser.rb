@@ -1,4 +1,4 @@
-class RFC822::DomainParser
+class EmailAddressValidator::DomainParser
 # STANDALONE START
     def setup_parser(str, debug=false)
       @string = str
@@ -9,6 +9,9 @@ class RFC822::DomainParser
       @failing_rule_offset = -1
 
       setup_foreign_grammar
+    end
+
+    def setup_foreign_grammar
     end
 
     # This is distinct from setup_parser so that a standalone parser
