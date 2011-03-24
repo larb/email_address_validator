@@ -1,23 +1,15 @@
+require 'bundler'
+Bundler::GemHelper.install_tasks
 
-begin
-  require 'bones'
-rescue LoadError
-  abort '### Please install the "bones" gem ###'
-end
+require 'rake/rdoctask'
 
-task :default => 'test:run'
-task 'gem:release' => 'test:run'
+require 'rspec/core/rake_task'
+RSpec::Core::RakeTask.new(:spec) 
+task :default => :spec
 
+desc "Rebuild the parsers"
 task "parser" do
   sh "kpeg -s -o lib/email_address_validator/rfc822-parser.rb  -f grammars/rfc822.kpeg"
   sh "kpeg -s -o lib/email_address_validator/rfc2822-parser.rb -f grammars/rfc2822.kpeg"
   sh "kpeg -s -o lib/email_address_validator/domain-parser.rb  -f grammars/domain.kpeg"
 end
-
-Bones {
-  name     'rfc-822-validator'
-  authors  'Evan Phoenix, Andrew Cholakian'
-  email    'andrew@andrewvc.com'
-  url      'https://github.com/andrewvc/rfc-822'
-}
-
