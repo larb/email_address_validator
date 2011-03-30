@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Evan Phoenix", "Andrew Cholakian"]
   s.email       = ["andrew@andrewvc.com"]
-  s.homepage    = "https://github.com/andrewvc/rfc-822"
+  s.homepage    = "https://github.com/larb/email_address_validator"
   s.summary     = %q{RFC 2822/822 Email Address Parsing.}
   s.description = %q{RFC Compliant Email Address Parsing using the KPEG grammars.}
   s.extra_rdoc_files = [
