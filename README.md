@@ -43,7 +43,6 @@ A few fun things came up researching this library:
 
 * RFCs 2822/822 do not validate domains properly.
 * RFCs 2822/822 support groups, multiple labeled lists of addresses such as `MyGroup: "John Higgins" <john@example.net>, mark mark@example.net;`
-* RFC 822 supports routes, a sequence of mailservers the message is supposed to travel, such as `test@mymailserver@othermailserver.com`
 * RFCs 2822/822 support double quoted strings as the local part of an address, with crazy chars in them, such as `"my@funky$address"@example.net`
 * RFCs 2822/822 support phrases before angle bracketed addresses so the entirety of the string `"Test" <test@example.net>` is valid. This is why you probably only want to validate the addr_spec portion.
 
