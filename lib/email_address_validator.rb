@@ -2,7 +2,6 @@ module EmailAddressValidator
   # :stopdoc:
   LIBPATH = ::File.expand_path(::File.dirname(__FILE__)) + ::File::SEPARATOR
   PATH = ::File.dirname(LIBPATH) + ::File::SEPARATOR
-  VERSION = ::File.read(PATH + 'version.txt').strip
   # :startdoc:
 
   # Returns the library path for the module. If any arguments are given,
