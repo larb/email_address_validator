@@ -483,7 +483,8 @@ class EmailAddressValidator::RFC822Parser
 
   # atom = /[^\]\x00-\x20 \x7F\x80-\xFF()<>@,;:\\".\[]+/
   def _atom
-    _tmp = scan(/\A(?-mix:[^\]\x00-\x20 \x7F\x80-\xFF()<>@,;:\\".\[]+)/)
+    pattern = /\A(?-mix:[^\]\x00-\x20 \x7F\x80-\xFF()<>@,;:\\".\[]+)/n
+    _tmp = scan(pattern)
     set_failed_rule :_atom unless _tmp
     return _tmp
   end
@@ -493,7 +494,7 @@ class EmailAddressValidator::RFC822Parser
 
     _save = self.pos
     while true # choice
-    _tmp = scan(/\A(?-mix:[^)\\\x0D\x80-\xFF(]+)/)
+    _tmp = scan(/\A(?-mix:[^)\\\x0D\x80-\xFF(]+)/n)
     break if _tmp
     self.pos = _save
     _tmp = apply(:_linear_white_space)
@@ -511,7 +512,7 @@ class EmailAddressValidator::RFC822Parser
 
     _save = self.pos
     while true # choice
-    _tmp = scan(/\A(?-mix:[^\]\\\x0D\x80-\xFF\[]+)/)
+    _tmp = scan(/\A(?-mix:[^\]\\\x0D\x80-\xFF\[]+)/n)
     break if _tmp
     self.pos = _save
     _tmp = apply(:_linear_white_space)
@@ -529,7 +530,7 @@ class EmailAddressValidator::RFC822Parser
 
     _save = self.pos
     while true # choice
-    _tmp = scan(/\A(?-mix:[^"\\\x0D\x80-\xFF]+)/)
+    _tmp = scan(/\A(?-mix:[^"\\\x0D\x80-\xFF]+)/n)
     break if _tmp
     self.pos = _save
     _tmp = apply(:_linear_white_space)
