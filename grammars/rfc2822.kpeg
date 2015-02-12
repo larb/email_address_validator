@@ -3,7 +3,7 @@
 %% { attr_accessor :validate_domain }
 
 d(num) = <.> &{ text[0] == num }
-d_btw(start,fin) = <.> &{ t = text[0]; t >= start && t <= fin }
+d_btw(start,fin) = <.> &{ t = text[0].ord; t >= start && t <= fin }
 
 WSP = " " | d(9)
 

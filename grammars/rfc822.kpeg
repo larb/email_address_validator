@@ -19,16 +19,16 @@ CRLF = CR LF
 
 linear_white_space = (CRLF? LWSP_char)+
 
-atom = /[^\]\x00-\x20 \x7F\x80-\xFF()<>@,;:\\".\[]+/
+atom = /[^\]\x00-\x20 \x7F\x80-\xFF()<>@,;:\\".\[]+/n
 
-ctext = /[^)\\\x0D\x80-\xFF(]+/
+ctext = /[^)\\\x0D\x80-\xFF(]+/n
       | linear_white_space
 
 
-dtext = /[^\]\\\x0D\x80-\xFF\[]+/
+dtext = /[^\]\\\x0D\x80-\xFF\[]+/n
       | linear_white_space
 
-qtext = /[^"\\\x0D\x80-\xFF]+/
+qtext = /[^"\\\x0D\x80-\xFF]+/n
       | linear_white_space
 
 

@@ -1,8 +1,19 @@
 class EmailAddressValidator::DomainParser
-# STANDALONE START
+  # :stopdoc:
+
+    # This is distinct from setup_parser so that a standalone parser
+    # can redefine #initialize and still have access to the proper
+    # parser setup code.
+    def initialize(str, debug=false)
+      setup_parser(str, debug)
+    end
+
+
+
+    # Prepares for parsing +str+.  If you define a custom initialize you must
+    # call this method before #parse
     def setup_parser(str, debug=false)
-      @string = str
-      @pos = 0
+      set_string str, 0
       @memoizations = Hash.new { |h,k| h[k] = {} }
       @result = nil
       @failed_rule = nil
@@ -11,22 +22,10 @@ class EmailAddressValidator::DomainParser
       setup_foreign_grammar
     end
 
-    def setup_foreign_grammar
-    end
-
-    # This is distinct from setup_parser so that a standalone parser
-    # can redefine #initialize and still have access to the proper
-    # parser setup code.
-    #
-    def initialize(str, debug=false)
-      setup_parser(str, debug)
-    end
-
     attr_reader :string
-    attr_reader :result, :failing_rule_offset
-    attr_accessor :pos
+    attr_reader :failing_rule_offset
+    attr_accessor :result, :pos
 
-    # STANDALONE START
     def current_column(target=pos)
       if c = string.rindex("\n", target-1)
         return target - c - 1
@@ -54,10 +53,17 @@ class EmailAddressValidator::DomainParser
       lines
     end
 
-    #
+
 
     def get_text(start)
       @string[start..@pos-1]
+    end
+
+    # Sets the string and current parsing position for the parser.
+    def set_string string, pos
+      @string = string
+      @string_size = string ? string.size : 0
+      @pos = pos
     end
 
     def show_pos
@@ -166,19 +172,19 @@ class EmailAddressValidator::DomainParser
       return nil
     end
 
-    if "".respond_to? :getbyte
+    if "".respond_to? :ord
       def get_byte
-        if @pos >= @string.size
+        if @pos >= @string_size
           return nil
         end
 
-        s = @string.getbyte @pos
+        s = @string[@pos].ord
         @pos += 1
         s
       end
     else
       def get_byte
-        if @pos >= @string.size
+        if @pos >= @string_size
           return nil
         end
 
@@ -189,41 +195,37 @@ class EmailAddressValidator::DomainParser
     end
 
     def parse(rule=nil)
+      # We invoke the rules indirectly via apply
+      # instead of by just calling them as methods because
+      # if the rules use left recursion, apply needs to
+      # manage that.
+
       if !rule
-        _root ? true : false
+        apply(:_root)
       else
-        # This is not shared with code_generator.rb so this can be standalone
         method = rule.gsub("-","_hyphen_")
-        __send__("_#{method}") ? true : false
+        apply :"_#{method}"
       end
-    end
-
-    class LeftRecursive
-      def initialize(detected=false)
-        @detected = detected
-      end
-
-      attr_accessor :detected
     end
 
     class MemoEntry
       def initialize(ans, pos)
         @ans = ans
         @pos = pos
-        @uses = 1
         @result = nil
+        @set = false
+        @left_rec = false
       end
 
-      attr_reader :ans, :pos, :uses, :result
-
-      def inc!
-        @uses += 1
-      end
+      attr_reader :ans, :pos, :result, :set
+      attr_accessor :left_rec
 
       def move!(ans, pos, result)
         @ans = ans
         @pos = pos
         @result = result
+        @set = true
+        @left_rec = false
       end
     end
 
@@ -231,30 +233,27 @@ class EmailAddressValidator::DomainParser
       old_pos = @pos
       old_string = @string
 
-      @pos = other.pos
-      @string = other.string
+      set_string other.string, other.pos
 
       begin
         if val = __send__(rule, *args)
           other.pos = @pos
+          other.result = @result
         else
           other.set_failed_rule "#{self.class}##{rule}"
         end
         val
       ensure
-        @pos = old_pos
-        @string = old_string
+        set_string old_string, old_pos
       end
     end
 
-    def apply(rule)
-      if m = @memoizations[rule][@pos]
-        m.inc!
-
-        prev = @pos
+    def apply_with_args(rule, *args)
+      memo_key = [rule, args]
+      if m = @memoizations[memo_key][@pos]
         @pos = m.pos
-        if m.ans.kind_of? LeftRecursive
-          m.ans.detected = true
+        if !m.set
+          m.left_rec = true
           return nil
         end
 
@@ -262,19 +261,20 @@ class EmailAddressValidator::DomainParser
 
         return m.ans
       else
-        lr = LeftRecursive.new(false)
-        m = MemoEntry.new(lr, @pos)
-        @memoizations[rule][@pos] = m
+        m = MemoEntry.new(nil, @pos)
+        @memoizations[memo_key][@pos] = m
         start_pos = @pos
 
-        ans = __send__ rule
+        ans = __send__ rule, *args
+
+        lr = m.left_rec
 
         m.move! ans, @pos, @result
 
         # Don't bother trying to grow the left recursion
         # if it's failing straight away (thus there is no seed)
-        if ans and lr.detected
-          return grow_lr(rule, start_pos, m)
+        if ans and lr
+          return grow_lr(rule, args, start_pos, m)
         else
           return ans
         end
@@ -283,12 +283,50 @@ class EmailAddressValidator::DomainParser
       end
     end
 
-    def grow_lr(rule, start_pos, m)
+    def apply(rule)
+      if m = @memoizations[rule][@pos]
+        @pos = m.pos
+        if !m.set
+          m.left_rec = true
+          return nil
+        end
+
+        @result = m.result
+
+        return m.ans
+      else
+        m = MemoEntry.new(nil, @pos)
+        @memoizations[rule][@pos] = m
+        start_pos = @pos
+
+        ans = __send__ rule
+
+        lr = m.left_rec
+
+        m.move! ans, @pos, @result
+
+        # Don't bother trying to grow the left recursion
+        # if it's failing straight away (thus there is no seed)
+        if ans and lr
+          return grow_lr(rule, nil, start_pos, m)
+        else
+          return ans
+        end
+
+        return ans
+      end
+    end
+
+    def grow_lr(rule, args, start_pos, m)
       while true
         @pos = start_pos
         @result = m.result
 
-        ans = __send__ rule
+        if args
+          ans = __send__ rule, *args
+        else
+          ans = __send__ rule
+        end
         return nil unless ans
 
         break if @pos <= m.pos
@@ -314,7 +352,9 @@ class EmailAddressValidator::DomainParser
       RuleInfo.new(name, rendered)
     end
 
-    #
+
+  # :startdoc:
+  # :stopdoc:
   def setup_foreign_grammar; end
 
   # domain = < subdomain > &{ text.size < 255 }
@@ -322,22 +362,22 @@ class EmailAddressValidator::DomainParser
 
     _save = self.pos
     while true # sequence
-    _text_start = self.pos
-    _tmp = apply(:_subdomain)
-    if _tmp
-      text = get_text(_text_start)
-    end
-    unless _tmp
-      self.pos = _save
+      _text_start = self.pos
+      _tmp = apply(:_subdomain)
+      if _tmp
+        text = get_text(_text_start)
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _save1 = self.pos
+      _tmp = begin;  text.size < 255 ; end
+      self.pos = _save1
+      unless _tmp
+        self.pos = _save
+      end
       break
-    end
-    _save1 = self.pos
-    _tmp = begin;  text.size < 255 ; end
-    self.pos = _save1
-    unless _tmp
-      self.pos = _save
-    end
-    break
     end # end sequence
 
     set_failed_rule :_domain unless _tmp
@@ -350,31 +390,31 @@ class EmailAddressValidator::DomainParser
     _save = self.pos
     while true # choice
 
-    _save1 = self.pos
-    while true # sequence
-    _tmp = apply(:_subdomain)
-    unless _tmp
-      self.pos = _save1
-      break
-    end
-    _tmp = match_string(".")
-    unless _tmp
-      self.pos = _save1
-      break
-    end
-    _tmp = apply(:_label)
-    unless _tmp
-      self.pos = _save1
-    end
-    break
-    end # end sequence
+      _save1 = self.pos
+      while true # sequence
+        _tmp = apply(:_subdomain)
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = match_string(".")
+        unless _tmp
+          self.pos = _save1
+          break
+        end
+        _tmp = apply(:_label)
+        unless _tmp
+          self.pos = _save1
+        end
+        break
+      end # end sequence
 
-    break if _tmp
-    self.pos = _save
-    _tmp = apply(:_label)
-    break if _tmp
-    self.pos = _save
-    break
+      break if _tmp
+      self.pos = _save
+      _tmp = apply(:_label)
+      break if _tmp
+      self.pos = _save
+      break
     end # end choice
 
     set_failed_rule :_subdomain unless _tmp
@@ -386,31 +426,31 @@ class EmailAddressValidator::DomainParser
 
     _save = self.pos
     while true # sequence
-    _tmp = apply(:_let_hyphen_dig)
-    unless _tmp
-      self.pos = _save
+      _tmp = apply(:_let_hyphen_dig)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _text_start = self.pos
+      while true
+        _tmp = apply(:_let_hyphen_dig_hyphen_hyp)
+        break unless _tmp
+      end
+      _tmp = true
+      if _tmp
+        text = get_text(_text_start)
+      end
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _save2 = self.pos
+      _tmp = begin;  text.size < 63 && (text.size == 0 || text[-1] != ?-) ; end
+      self.pos = _save2
+      unless _tmp
+        self.pos = _save
+      end
       break
-    end
-    _text_start = self.pos
-    while true
-    _tmp = apply(:_let_hyphen_dig_hyphen_hyp)
-    break unless _tmp
-    end
-    _tmp = true
-    if _tmp
-      text = get_text(_text_start)
-    end
-    unless _tmp
-      self.pos = _save
-      break
-    end
-    _save2 = self.pos
-    _tmp = begin;  text.size < 63 && (text.size == 0 || text[-1] != ?-) ; end
-    self.pos = _save2
-    unless _tmp
-      self.pos = _save
-    end
-    break
     end # end sequence
 
     set_failed_rule :_label unless _tmp
@@ -422,13 +462,13 @@ class EmailAddressValidator::DomainParser
 
     _save = self.pos
     while true # choice
-    _tmp = apply(:_let_hyphen_dig)
-    break if _tmp
-    self.pos = _save
-    _tmp = match_string("-")
-    break if _tmp
-    self.pos = _save
-    break
+      _tmp = apply(:_let_hyphen_dig)
+      break if _tmp
+      self.pos = _save
+      _tmp = match_string("-")
+      break if _tmp
+      self.pos = _save
+      break
     end # end choice
 
     set_failed_rule :_let_hyphen_dig_hyphen_hyp unless _tmp
@@ -440,13 +480,13 @@ class EmailAddressValidator::DomainParser
 
     _save = self.pos
     while true # choice
-    _tmp = apply(:_letter)
-    break if _tmp
-    self.pos = _save
-    _tmp = apply(:_digit)
-    break if _tmp
-    self.pos = _save
-    break
+      _tmp = apply(:_letter)
+      break if _tmp
+      self.pos = _save
+      _tmp = apply(:_digit)
+      break if _tmp
+      self.pos = _save
+      break
     end # end choice
 
     set_failed_rule :_let_hyphen_dig unless _tmp
@@ -472,19 +512,19 @@ class EmailAddressValidator::DomainParser
 
     _save = self.pos
     while true # sequence
-    _tmp = apply(:_domain)
-    unless _tmp
-      self.pos = _save
+      _tmp = apply(:_domain)
+      unless _tmp
+        self.pos = _save
+        break
+      end
+      _save1 = self.pos
+      _tmp = get_byte
+      _tmp = _tmp ? nil : true
+      self.pos = _save1
+      unless _tmp
+        self.pos = _save
+      end
       break
-    end
-    _save1 = self.pos
-    _tmp = get_byte
-    _tmp = _tmp ? nil : true
-    self.pos = _save1
-    unless _tmp
-      self.pos = _save
-    end
-    break
     end # end sequence
 
     set_failed_rule :_root unless _tmp
@@ -500,4 +540,5 @@ class EmailAddressValidator::DomainParser
   Rules[:_letter] = rule_info("letter", "/[A-Za-z]/")
   Rules[:_digit] = rule_info("digit", "/[0-9]/")
   Rules[:_root] = rule_info("root", "domain !.")
+  # :startdoc:
 end
