@@ -90,24 +90,28 @@ describe EmailAddressValidator do
   VALID_MODERN.each do |addr|
     it "should recognize modern <#{addr}> as valid" do
       EmailAddressValidator.validate_2822_addr(addr).should be_true
+      EmailAddressValidator.validate_addr(addr).should be_true
     end
   end
 
   INVALID_MODERN.each do |addr|
     it "should recognize modern <#{addr}> as invalid" do
       EmailAddressValidator.validate_2822_addr(addr).should be_false
+      EmailAddressValidator.validate_addr(addr).should be_false
     end
   end
 
   VALID_ADDRSPEC.each do |addr|
     it "should recognize modern <#{addr}> as valid" do
       EmailAddressValidator.validate_2822_addr(addr).should be_true
+      EmailAddressValidator.validate_addr(addr).should be_true
     end
   end
 
   VALID_DOMAIN_COMMON.each do |addr|
     it "should validate the domain of <#{addr}> as valid" do
       EmailAddressValidator.validate_2822(addr, true).should be_true
+      EmailAddressValidator.validate(addr, true).should be_true
     end
   end
 
