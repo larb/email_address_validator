@@ -52,7 +52,9 @@ module EmailAddressValidator
   end
   
   # Shorthand for +EmailAddressParser.validate_2822_addr
-  def self.validate_addr(addr, validate_domain=false); self.validate_2822; end
+  def self.validate_addr(addr, validate_domain=false)
+    validate_2822_addr addr, validate_domain
+  end
 
   # Validates +addr+ against the addr_spec portion of RFC 2822.
   # This is what most people actually want out of an email validator
@@ -65,7 +67,9 @@ module EmailAddressValidator
   end
 
   # Shorthand for +EmailAddressParser.validate_2822
-  def self.validate(addr, validate_domain=false); self.validate_2822; end
+  def self.validate(addr, validate_domain=false)
+    validate_2822 addr, validate_domain
+  end
 
   # Validates an email address according to RFC 2822
   # This validates addresses against the full spec, which
