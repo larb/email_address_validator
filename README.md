@@ -62,9 +62,9 @@ Andrew Cholakian / [andrewvc](http://github.com/andrewvc)
 
 ## License ##
  
-(The MIT License) FIXME (different license?)
+The MIT License
 
-Copyright (c) 2011 FIXME (author's name)
+Copyright (c) 2011 Evan Phoenix and Andrew Cholakian
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
