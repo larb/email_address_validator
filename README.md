@@ -1,67 +1,74 @@
-# EmailAddressValidator #
+# EmailAddressValidator
 
 Implementation of RFCs 2822 and 822 for email address validation, and 1123 for domain validation.
 
-## Description ##
+## Description
 
 Parsing email addresses is not easy, and most regex based approaches deviate from the RFCs. This library is based off the actual grammars in the RFCs, allowing it to achieve greater accuracy.
 
-This may mean that this library is more permissive than you desire, as the RFCs support syntax that many will find undesirable. To accomodate this, there are a few options users can set to achieve more practical results.
+This may mean that this library is more permissive than you desire, as the RFCs support syntax that many will find undesirable. To accommodate this, there are a few options users can set to achieve more practical results.
 
 The two man things to know are that:
 
-1. What most people desire from a validator is to match only the addr_spec portion of the grammars, as this keeps certain weird addresses, such as RFC groups excluded.
+1. What most people desire from a validator is to match only the `addr_spec` portion of the grammars, as this keeps certain weird addresses, such as RFC groups excluded.
 2. RFCs 822/2822 do not require valid domains, essentially requiring little more than dotted strings. This library provides additional RFC-1123 Parsing to ensure that a valid domain has been passed in.
 
-## Examples ##
+## Examples
 
-Validate only the addr_spec portion of an address as per RFC-2822. Additionally, validate the domain of the address as per RFC-1123. This is what most people probably want:
+Validate only the `addr_spec` portion of an address as per RFC-2822. Additionally, validate the domain of the address as per RFC-1123. This is what most people probably want:
 
-    EmailAddressValidator.validate_addr('example@example.net',true)
+```ruby
+EmailAddressValidator.validate_addr('example@example.net', true)
+```
 
 Validate against the full grammar for RFC-2822, without checking the domain.
 
-    EmailAddressValidator.validate('example@example.net', false)
+```ruby
+EmailAddressValidator.validate('example@example.net', false)
+```
 
-Validate against the addr_spec portion of RFC-822
+Validate against the `addr_spec` portion of RFC-822.
 
-    EmailAddressValidator.validate_822_addr('example@example.net')
+```ruby
+EmailAddressValidator.validate_822_addr('example@example.net')
+```
 
-Validate against the full grammar for RFC-822
+Validate against the full grammar for RFC-822.
 
-    EmailAddressValidator.validate_822('example@example.net')
+```ruby
+EmailAddressValidator.validate_822('example@example.net')
+```
 
-Validate a domain per RFC-1123
-    
-    EmailAddressValidator.validate_domain('example.net')
+Validate a domain per RFC-1123.
 
-## Additional notes on the RFCs ##
+```ruby
+EmailAddressValidator.validate_domain('example.net')
+```
+
+## Additional notes on the RFCs
 
 RFC 2822 removes a lot of the cruft that 822 carries with it, unless you have a good reason, you likely want to stay away from RFC 822.
 
-A few fun things came up researching this library: 
+A few fun things came up researching this library:
 
-* RFCs 2822/822 do not validate domains properly.
-* RFCs 2822/822 support groups, multiple labeled lists of addresses such as `MyGroup: "John Higgins" <john@example.net>, mark mark@example.net;`
-* RFCs 2822/822 support double quoted strings as the local part of an address, with crazy chars in them, such as `"my@funky$address"@example.net`
-* RFCs 2822/822 support phrases before angle bracketed addresses so the entirety of the string `"Test" <test@example.net>` is valid. This is why you probably only want to validate the addr_spec portion.
+- RFCs 2822/822 do not validate domains properly.
+- RFCs 2822/822 support groups, multiple labeled lists of addresses such as `MyGroup: "John Higgins" <john@example.net>, mark mark@example.net;`
+- RFCs 2822/822 support double quoted strings as the local part of an address, with crazy chars in them, such as `"my@funky$address"@example.net`
+- RFCs 2822/822 support phrases before angle bracketed addresses so the entirety of the string `"Test" <test@example.net>` is valid. This is why you probably only want to validate the `addr_spec` portion.
 
-## Further Reading ##
+## Further Reading
 
-[RFC-2822](http://www.ietf.org/rfc/rfc2822.txt)
- 
-[RFC-822](http://www.ietf.org/rfc/rfc0822.txt)
- 
-[RFC-1123](http://www.ietf.org/rfc/rfc1123.txt)
+- [RFC-2822](http://www.ietf.org/rfc/rfc2822.txt)
+- [RFC-822](http://www.ietf.org/rfc/rfc0822.txt)
+- [RFC-1123](http://www.ietf.org/rfc/rfc1123.txt)
 
-## Authors ##
+## Authors
 
-Evan Phoenix / [evanphx](http://github.com/evanphx)
+- Evan Phoenix / [@evanphx](http://github.com/evanphx)
+- Andrew Cholakian / [@andrewvc](http://github.com/andrewvc)
 
-Andrew Cholakian / [andrewvc](http://github.com/andrewvc)
+## License
 
-## License ##
- 
 The MIT License
 
 Copyright (c) 2011 Evan Phoenix and Andrew Cholakian
