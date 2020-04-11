@@ -97,7 +97,7 @@ module EmailAddressValidator
 
   # Validates a domain name
   def self.validate_domain(domain)
-    parser = DomainParser.new(addr)
+    parser = DomainParser.new(domain)
     parser.parse
   end
 
