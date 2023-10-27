@@ -16,14 +16,11 @@ Gem::Specification.new do |s|
     "README.md"
   ]
 
-  s.rubyforge_project = "email_address_validator"
-
   s.add_development_dependency "rspec", ">= 2.4.0"
   s.add_development_dependency "kpeg",  ">= 0.7.0"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
-  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 end
 
